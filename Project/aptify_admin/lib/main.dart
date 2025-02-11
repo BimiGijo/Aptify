@@ -1,8 +1,18 @@
+import 'package:aptify_admin/screen/adminhome.dart';
+import 'package:aptify_admin/screen/login.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+
+Future<void> main() async {
+   await Supabase.initialize(
+    url: 'https://udwljnpnaiwtxapejhtk.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkd2xqbnBuYWl3dHhhcGVqaHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQzNDYzOTAsImV4cCI6MjA0OTkyMjM5MH0.ygLmDJT5qw0J33qVggZBfHFMBrSggGrCi5BDytpTC_8',
+  );
   runApp(const MainApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -10,11 +20,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+      debugShowCheckedModeBanner: false,
+      home: AdminHome(),
     );
   }
 }
