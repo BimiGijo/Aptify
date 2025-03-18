@@ -13,16 +13,18 @@ class _SidebarState extends State<Sidebar> {
 
   final List<String> pages = [
     "Dashboard",
-    "Manage Category",
-    "Manage Year",
-    "Manage Department"
+    "Manage Faculty",
+    "Manage Academic Year",
+    "Manage Classes",
+    "View Students"
   ];
 
   final List<IconData> icons = [
     Icons.dashboard,
-    Icons.category,
-    Icons.add_box,
-    Icons.school
+    Icons.school,
+    Icons.school,
+    Icons.school,
+    Icons.groups
   ];
 
   @override
@@ -30,7 +32,7 @@ class _SidebarState extends State<Sidebar> {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF013E7F), Color(0xFF003D7E)], // Updated gradient for sidebar
+          colors: [Color(0xFF000000), Color.fromARGB(255, 1, 51, 105)], // Updated gradient for sidebar
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -67,12 +69,12 @@ class _SidebarState extends State<Sidebar> {
                     },
                     leading: Icon(
                       icons[index], 
-                      color: isSelected ? Colors.orangeAccent : Colors.white,
+                      color: Colors.white,
                     ),
                     title: Text(
                       pages[index],
                       style: TextStyle(
-                        color: isSelected ? Colors.orangeAccent : Colors.white,
+                        color: Colors.white,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),

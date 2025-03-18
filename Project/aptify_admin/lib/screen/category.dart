@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:aptify_admin/main.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-final supabase = Supabase.instance.client;
 
 class Category extends StatefulWidget {
   const Category({super.key});
@@ -13,9 +10,11 @@ class Category extends StatefulWidget {
 
 class _CategoryState extends State<Category> with SingleTickerProviderStateMixin {
   bool _isFormVisible = false;
+  final Duration _animationDuration = const Duration(milliseconds: 300);
   final TextEditingController _categoryController = TextEditingController();
-  List<Map<String, dynamic>> categoryList = [];
-  int editId = 0;
+  final TextEditingController _linkController = TextEditingController();
+  List<Map<String, dynamic>> _categoryList = [];
+  int _editId = 0;
 
   @override
   void initState() {
@@ -25,45 +24,45 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
 
   Future<void> fetchData() async {
     try {
-      final data = await supabase.from('tbl_category').select();
+      final response = await supabase.from('tbl_category').select();
       setState(() {
-        categoryList = data.isNotEmpty ? data : [];
+        _categoryList = response;
       });
     } catch (e) {
-      print("Error fetching category: $e");
+      print("Error fetching categories: $e");
     }
   }
 
   Future<void> categorySubmit() async {
     try {
       String category = _categoryController.text.trim();
+      String link = _linkController.text.trim();
       if (category.isEmpty) return;
-      await supabase.from('tbl_category').insert({'category_name': category});
+
+      await supabase.from('tbl_category').insert({
+        'category_name': category,
+        'category_link': link
+      });
+      fetchData();
       _categoryController.clear();
-      fetchData();
+      _linkController.clear();
+      showSnackbar('Category Added', Color(0xFF14213D));
     } catch (e) {
-      print('Error Inserting Category: $e');
+      print('Error inserting category: $e');
     }
   }
 
-  Future<void> delete(int id) async {
-    try {
-      await supabase.from('tbl_category').delete().eq('category_id', id);
-      fetchData();
-    } catch (e) {
-      print('Error deleting data: $e');
-    }
-  }
-
-  Future<void> update() async {
+  Future<void> updateCategory() async {
     try {
       if (_categoryController.text.trim().isEmpty) return;
       await supabase.from('tbl_category').update({
         'category_name': _categoryController.text.trim(),
-      }).eq('category_id', editId);
+        'category_link': _linkController.text.trim()
+      }).eq('category_id', _editId);
       fetchData();
+      showSnackbar('Category Updated', Color(0xFF14213D));
       setState(() {
-        editId = 0;
+        _editId = 0;
         _categoryController.clear();
       });
     } catch (e) {
@@ -71,62 +70,106 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
     }
   }
 
+  Future<void> deleteCategory(int id) async {
+    try {
+      await supabase.from('tbl_category').delete().eq('category_id', id);
+      fetchData();
+      showSnackbar('Category Deleted', Color(0xFF14213D));
+      setState(() {
+        _editId = 0;
+        _categoryController.clear();
+        _linkController.clear();
+      });
+    } catch (e) {
+      print("Error deleting category: $e");
+    }
+  }
+
+  void showSnackbar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message, style: TextStyle(color: Colors.white)), backgroundColor: color),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(18.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Manage Category', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text('MANAGE CATEGORY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF161616),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 18)),
                 onPressed: () {
                   setState(() {
                     _isFormVisible = !_isFormVisible;
+                    if (!_isFormVisible) {
+                      _editId = 0;
+                      _categoryController.clear();
+                      _linkController.clear();
+                    }
                   });
                 },
-                icon: Icon(_isFormVisible ? Icons.cancel : Icons.add),
-                label: Text(_isFormVisible ? "Cancel" : "Add Category"),
-              ),
+                label: Text(_isFormVisible ? "Cancel" : "Add", style: TextStyle(color: Colors.white)),
+                icon: Icon(_isFormVisible ? Icons.cancel : Icons.add, color: Colors.white),
+              )
             ],
           ),
-          if (_isFormVisible)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _categoryController,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter Category',
-                          border: OutlineInputBorder(),
+          AnimatedSize(
+            duration: _animationDuration,
+            curve: Curves.easeInOut,
+            child: _isFormVisible
+                ? Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 2, blurRadius: 5)],
+                    ),
+                    child: Column(
+                      children: [
+                        Text(_editId == 0 ? "Add Category" : "Edit Category", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          controller: _categoryController,
+                          decoration: InputDecoration(
+                            hintText: 'Category',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.category),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: editId == 0 ? categorySubmit : update,
-                        child: Text(editId == 0 ? 'Add' : 'Update'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                        SizedBox(height: 20),
+                        TextField(
+                          controller: _linkController,
+                          decoration: InputDecoration(
+                            hintText: 'Category API Link',
+                            border: OutlineInputBorder()
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF161616), padding: EdgeInsets.symmetric(horizontal: 70, vertical: 18)),
+                          onPressed: _editId == 0 ? categorySubmit : updateCategory,
+                          child: Text(_editId == 0 ? 'Add' : 'Update', style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    ),
+                  )
+                : Container(),
+          ),
           Expanded(
-            child: categoryList.isEmpty
-                ? const Center(child: Text("No Categories Found"))
+            child: _categoryList.isEmpty
+                ? Center(child: Text("No Categories Found"))
                 : ListView.builder(
-                    itemCount: categoryList.length,
+                    itemCount: _categoryList.length,
                     itemBuilder: (context, index) {
-                      final category = categoryList[index];
+                      final category = _categoryList[index];
                       return Card(
                         child: ListTile(
                           title: Text(category['category_name']),
@@ -134,20 +177,19 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.edit),
+                                icon: Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
                                   setState(() {
-                                    editId = category['category_id'];
+                                    _editId = category['category_id'];
                                     _categoryController.text = category['category_name'];
+                                    _linkController.text = category['category_link'];
                                     _isFormVisible = true;
                                   });
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  delete(category['category_id']);
-                                },
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => deleteCategory(category['category_id']),
                               ),
                             ],
                           ),

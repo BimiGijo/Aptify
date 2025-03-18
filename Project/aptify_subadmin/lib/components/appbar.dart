@@ -9,7 +9,7 @@ class Appbar extends StatelessWidget {
       height: 60,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF013E7F), Color(0xFF003D7E)], // Updated gradient to match screenshot
+          colors: [Color(0xFF000000), Color.fromARGB(255, 1, 51, 105)], // Updated gradient to match screenshot
           begin: Alignment.centerLeft,
           end: Alignment.centerRight
         )
@@ -19,7 +19,7 @@ class Appbar extends StatelessWidget {
         children: [
           Icon(
             Icons.account_circle,
-            color: Color(0xFFFCA311),
+            color: Colors.white,
           ),
           SizedBox(
             width: 10,

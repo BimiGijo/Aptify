@@ -1,11 +1,14 @@
+import 'package:aptify_admin/screen/difficulty.dart';
 import 'package:flutter/material.dart';
 import 'package:aptify_admin/component/appbar.dart';
 import 'package:aptify_admin/component/sidebar.dart';
 import 'package:aptify_admin/screen/dashboard.dart';
+import 'package:aptify_admin/screen/course.dart';
 import 'package:aptify_admin/screen/category.dart';
 import 'package:aptify_admin/screen/complaint.dart';
 import 'package:aptify_admin/screen/feedback.dart';
 import 'package:aptify_admin/screen/department.dart';
+import 'package:aptify_admin/screen/subadmin.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -19,8 +22,11 @@ class _AdminHomeState extends State<AdminHome> {
 
   final List<Widget> _pages = [
     const Dashboard(),
-    const Category(),
+    SubAdmin(),
     const Department(),
+    const Course(),
+    const Category(),
+    const Difficulty(),
     const ComplaintScreen(),
     const FeedbackScreen(),
   ];
@@ -44,7 +50,7 @@ class _AdminHomeState extends State<AdminHome> {
             child: Sidebar(onItemSelected: onSidebarItemTapped),
           ),
           Expanded(
-            flex: 5, // Adjust for better layout
+            flex: 7, // Adjust for better layout
             child: Column(
               children: [
                 const Appbar(),

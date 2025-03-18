@@ -1,5 +1,4 @@
 import 'package:aptify_admin/screen/adminhome.dart';
-import 'package:aptify_admin/screen/login.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -19,7 +18,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: AdminHome(),
     );

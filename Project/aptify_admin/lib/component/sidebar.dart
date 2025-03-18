@@ -13,23 +13,31 @@ class _SidebarState extends State<Sidebar> {
 
   final List<String> pages = [
     "Dashboard",
-    "Manage Category",
+    "Manage Colleges",
     "Manage Department",
+    "Manage Courses",
+    "Manage Category",
+    "Manage Difficulty",
     "View Complaints",
     "View Feedback",
   ];
 
   final List<IconData> icons = [
     Icons.dashboard,
-    Icons.category,
+    Icons.school,
     Icons.account_tree,
+    Icons.category,
+    Icons.school,
+    Icons.category,
     Icons.report,
     Icons.feedback
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Container(width: 50,
+    return Container(  
+      width: 100, 
+      constraints: const BoxConstraints(maxWidth: 100), 
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF000000), Color(0xFF0A192F)], // Darker gradient
@@ -46,9 +54,8 @@ class _SidebarState extends State<Sidebar> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 70),
           Expanded(
             child: ListView.builder(
               itemCount: pages.length,
@@ -56,11 +63,12 @@ class _SidebarState extends State<Sidebar> {
                 bool isSelected = _selectedIndex == index;
                 return Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white.withOpacity(0.15) : Colors.transparent, // Darker highlight
-                    borderRadius: BorderRadius.circular(8),
+                    color: isSelected ? Colors.white.withOpacity(0.15) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
                   child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                     onTap: () {
                       setState(() {
                         _selectedIndex = index;
@@ -69,13 +77,15 @@ class _SidebarState extends State<Sidebar> {
                     },
                     leading: Icon(
                       icons[index], 
-                      color: isSelected ? Colors.orangeAccent : Colors.white, // Highlight active icon
+                      color: isSelected ? Colors.orangeAccent : Colors.white,
+                      size: 30, 
                     ),
                     title: Text(
                       pages[index],
                       style: TextStyle(
-                        color: isSelected ? Colors.orangeAccent : Colors.white, // Highlight text
+                        color: isSelected ? Colors.orangeAccent : Colors.white,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontSize: 16, 
                       ),
                     ),
                   ),
