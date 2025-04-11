@@ -4,20 +4,6 @@ import 'package:aptify_faculty/screen/profile.dart';
 import 'package:aptify_faculty/screen/student.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(FacultyHome());
-}
-
-class FacultyHome extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: FacultyHomePage(),
-    );
-  }
-}
-
 class FacultyHomePage extends StatelessWidget {
   final List<Map<String, dynamic>> categories = [
     {'icon': Icons.group_add, 'title': 'Manage New Students', 'route' : StudentPage()},

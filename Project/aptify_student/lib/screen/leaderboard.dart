@@ -26,7 +26,7 @@ class Leaderboard extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.amber.shade400, Colors.orange.shade500],
+                colors: [Colors.orange.shade500, Colors.amber.shade400],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),

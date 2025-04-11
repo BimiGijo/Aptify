@@ -27,11 +27,52 @@ class _DifficultyState extends State<Difficulty> {
     });
   }
 
+  /// Function to insert quizhead before navigation
+  Future<void> insertQuizHeadAndNavigate(Map<String, dynamic> difficulty) async {
+    try {
+      // Insert into tbl_quizhead
+      final response = await supabase.from('tbl_quizhead').insert({
+        'category_id': widget.category['category_id'],   // Foreign key
+        'difficulty_id': difficulty['difficulty_id'],    // Foreign key
+           
+      }).select('quizhead_id').single();
+
+      if (response != null) {
+        // Extract the generated quizhead_id
+        final quizheadId = response['quizhead_id'];
+
+        // Navigate to the next page with the inserted quizhead ID
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Takequiz(
+              category: widget.category,
+              difficulty: difficulty,
+              quizheadId: quizheadId,   // Pass the generated ID
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to insert quizhead'))
+        );
+      }
+    } catch (e) {
+      print('Error inserting quizhead: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error inserting quizhead'))
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Difficulty', style: TextStyle(fontWeight: FontWeight.bold),),
+        title: const Text(
+          'Select Difficulty',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.amber,
       ),
       body: Center(
@@ -60,15 +101,8 @@ class _DifficultyState extends State<Difficulty> {
                     return GestureDetector(
                       onTap: () {
                         if (difficulty['difficulty_name'] != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Takequiz(
-                                category: widget.category,
-                                difficulty: difficulty,
-                              ),
-                            ),
-                          );
+                          // Insert before navigation
+                          insertQuizHeadAndNavigate(difficulty);
                         }
                       },
                       child: Card(

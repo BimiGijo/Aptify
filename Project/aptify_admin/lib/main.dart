@@ -1,6 +1,6 @@
-import 'package:aptify_admin/screen/adminhome.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:aptify_admin/screen/login.dart';
 
 
 Future<void> main() async {
@@ -20,7 +20,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AdminHome(),
+      home: LoginPage(),
     );
   }
 }
