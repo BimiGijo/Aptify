@@ -1,10 +1,10 @@
-import 'dart:ui'; // For blur effect
+import 'package:aptify_student/main.dart';
 import 'package:flutter/material.dart';
 import 'package:aptify_student/screen/adminhome.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // For authentication
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -22,22 +22,30 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
 
       try {
-        await Supabase.instance.client.auth.signInWithPassword(
+        final auth = await Supabase.instance.client.auth.signInWithPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
-
+        final response = await supabase.from('tbl_student').select().eq('student_id', auth.user!.id).single();
         // Navigate to Admin Home
-        if (mounted) {
+        if (response.isNotEmpty) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => AdminHome()),
           );
         }
+        else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('User not found'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } catch (e) {
         print('Login failed: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Invalid email or password'),
             backgroundColor: Colors.red,
           ),

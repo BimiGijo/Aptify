@@ -25,18 +25,36 @@ class _DepartmentState extends State<Department>
 
   Future<void> departmentSubmit() async {
     try {
-      String department = _departmentController.text.trim();
+      String department = _departmentController.text.trim().toLowerCase();
       if (department.isEmpty) return;
+
+      final departmentName = await supabase
+        .from('tbl_department')
+        .select('department_name');
+
+      final isDuplicate = departmentName.any((c) =>
+        c['department_name'].toString().trim().toLowerCase() == department);
+
+      if (isDuplicate) {
+        showSnackbar('Department already exists', Colors.orange);
+        return;
+      }
 
       await supabase
           .from('tbl_department')
           .insert({'department_name': department});
-      fetchData();
-      _departmentController.clear();
+
+      await fetchData();
+
+      setState(() {
+        _isFormVisible = false;
+        _departmentController.clear();
+      });
       showSnackbar('Department Added', Colors.green);
     } catch (e) {
       print('Error inserting department: $e');
     }
+
   }
 
   Future<void> fetchData() async {
@@ -52,15 +70,19 @@ class _DepartmentState extends State<Department>
 
   Future<void> updateDepartment() async {
     try {
-      if (_departmentController.text.trim().isEmpty) return;
+      if (_departmentController.text.trim().isEmpty || _editId == 0) return;
+
       await supabase.from('tbl_department').update({
         'department_name': _departmentController.text.trim(),
       }).eq('department_id', _editId);
-      fetchData();
+
+      await fetchData();
       showSnackbar('Department Updated', Colors.green);
+
       setState(() {
         _editId = 0;
         _departmentController.clear();
+        _isFormVisible = false;
       });
     } catch (e) {
       print("Error updating department: $e");
@@ -69,12 +91,18 @@ class _DepartmentState extends State<Department>
 
   Future<void> deleteDepartment(int id) async {
     try {
-      await supabase.from('tbl_department').delete().eq('department_id', id);
-      fetchData();
+      await supabase.from('tbl_department')
+      .delete()
+      .eq('department_id', id);
+
+      await fetchData();
       showSnackbar('Department Deleted', Colors.red);
+
       setState(() {
-        _editId = 0;
-        _departmentController.clear();
+        if (_editId == id) {
+          _editId = 0;
+          _departmentController.clear();
+        }
       });
     } catch (e) {
       if (e is PostgrestException) {
@@ -92,9 +120,17 @@ class _DepartmentState extends State<Department>
   void showSnackbar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(message, style: TextStyle(color: Colors.white)),
+          content: Text(message, style: const TextStyle(color: Colors.white)),
           backgroundColor: color),
     );
+  }
+
+  void populateFormForEdit(Map<String, dynamic> department) {
+    setState(() {
+      _editId = department['department_id'];
+      _departmentController.text = department['department_name'];
+      _isFormVisible = true;
+    });
   }
 
   @override
@@ -106,15 +142,15 @@ class _DepartmentState extends State<Department>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Manage Department',
+              const Text('MANAGE DEPARTMENT',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF161616),
+                    backgroundColor: const Color(0xFF161616),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5)),
                     padding:
-                        EdgeInsets.symmetric(horizontal: 25, vertical: 18)),
+                       const EdgeInsets.symmetric(horizontal: 25, vertical: 18)),
                 onPressed: () {
                   setState(() {
                     _isFormVisible = !_isFormVisible;
@@ -136,7 +172,7 @@ class _DepartmentState extends State<Department>
             curve: Curves.easeInOut,
             child: _isFormVisible
                 ? Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -150,29 +186,29 @@ class _DepartmentState extends State<Department>
                     child: Column(
                       children: [
                         Text(
-                            _editId == 0 ? "Add Department" : "Edit Department",
-                            style: TextStyle(
+                            _editId == 0 ? "Add Department" : "Update Department",
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _departmentController,
-                          decoration: InputDecoration(
-                            hintText: 'Department',
+                          decoration: const InputDecoration(
+                            labelText: 'Department Name',
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.category),
                           ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFF161616),
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 70, vertical: 18)),
                           onPressed: _editId == 0
                               ? departmentSubmit
                               : updateDepartment,
                           child: Text(_editId == 0 ? 'Add' : 'Update',
-                              style: TextStyle(color: Colors.white)),
+                              style: const TextStyle(color: Colors.white)),
                         ),
                       ],
                     ),

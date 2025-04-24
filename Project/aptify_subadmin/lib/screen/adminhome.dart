@@ -1,5 +1,6 @@
 import 'package:aptify_subadmin/screen/class.dart';
 import 'package:aptify_subadmin/screen/faculty.dart';
+import 'package:aptify_subadmin/screen/student.dart';
 import 'package:flutter/material.dart';
 import 'package:aptify_subadmin/components/appbar.dart';
 import 'package:aptify_subadmin/components/sidebar.dart';
@@ -21,7 +22,8 @@ class _AdminHomeState extends State<AdminHome> {
       const Dashboard(),
       const Faculty(),
       const Year(),
-      const DepClass()
+      const DepClass(),
+      const StudentPage()
   ];
 
   void onSidebarItemTapped(int index) {

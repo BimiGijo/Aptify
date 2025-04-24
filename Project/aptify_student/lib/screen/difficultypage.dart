@@ -37,27 +37,21 @@ class _DifficultyState extends State<Difficulty> {
            
       }).select('quizhead_id').single();
 
-      if (response != null) {
-        // Extract the generated quizhead_id
-        final quizheadId = response['quizhead_id'];
+      // Extract the generated quizhead_id
+      final quizheadId = response['quizhead_id'];
 
-        // Navigate to the next page with the inserted quizhead ID
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Takequiz(
-              category: widget.category,
-              difficulty: difficulty,
-              quizheadId: quizheadId,   // Pass the generated ID
-            ),
+      // Navigate to the next page with the inserted quizhead ID
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Takequiz(
+            category: widget.category,
+            difficulty: difficulty,
+            quizheadId: quizheadId,   // Pass the generated ID
           ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to insert quizhead'))
-        );
-      }
-    } catch (e) {
+        ),
+      );
+        } catch (e) {
       print('Error inserting quizhead: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error inserting quizhead'))

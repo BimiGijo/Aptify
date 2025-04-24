@@ -1,12 +1,12 @@
 import 'package:aptify_faculty/main.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';  // Supabase for authentication
+//import 'package:supabase_flutter/supabase_flutter.dart';  // Supabase for authentication
 import 'package:aptify_faculty/screen/adminhome.dart';
-import 'package:aptify_faculty/screen/profile.dart';
+import 'package:aptify_faculty/services/auth_service.dart';
 
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -14,10 +14,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscureText = true;
+  final AuthService _authService = AuthService();
+
 
   Future<void> _signIn() async {
     if (_formKey.currentState!.validate()) {
@@ -25,20 +27,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
       try {
         // Authentication with Supabase (assuming username as email)
+        await _authService.storeCredentials(
+          _emailController.text, _passwordController.text);
         final response = await supabase.auth.signInWithPassword(
-          email: _usernameController.text.trim(),
+          email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
         if(response.user != null ) {
-          final email = _usernameController.text.trim();
+          final uid = response.user!.id;
           final teacherResponse = await supabase
                 .from('tbl_teacher')
                 .select('teacher_id')
-                .eq('teacher_email', email)
+                .eq('teacher_id', uid)
                 .single();
 
-          if (mounted) {
+          if (teacherResponse.isNotEmpty) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => FacultyHomePage()),
@@ -103,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Username Field
                       TextFormField(
-                        controller: _usernameController,
+                        controller: _emailController,
                         decoration: InputDecoration(
                           labelText: "Username",
                           border: OutlineInputBorder(

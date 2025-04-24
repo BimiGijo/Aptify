@@ -1,118 +1,210 @@
 import 'dart:ui';
+import 'package:aptify_student/main.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Leaderboard extends StatelessWidget {
-  final List<Map<String, dynamic>> leaderboard = [
-    {"name": "Cameron Black", "score": 122585, "rank": 4},
-    {"name": "Gladys Fisher", "score": 122583, "rank": 5},
-    {"name": "Jennie Warren", "score": 122543, "rank": 6},
-    {"name": "Audrey Bell", "score": 122512, "rank": 7},
-    {"name": "Tyrone Hawkins", "score": 122431, "rank": 8},
-    {"name": "Michael Brown", "score": 122400, "rank": 9},
-    {"name": "Alice Cooper", "score": 122350, "rank": 10},
-    {"name": "Robert King", "score": 122300, "rank": 11},
-    {"name": "Emma Stone", "score": 122250, "rank": 12},
-    {"name": "Sophia Carter", "score": 122200, "rank": 13},
-    {"name": "Liam Johnson", "score": 122150, "rank": 14},
-    {"name": "Oliver Smith", "score": 122100, "rank": 15},
-  ];
+class Leaderboard extends StatefulWidget {
+
+  const Leaderboard({super.key});
+
+  @override
+  _LeaderboardState createState() => _LeaderboardState();
+}
+
+class _LeaderboardState extends State<Leaderboard> {
+  // Fetch leaderboard data from Supabase
+  Future<List<Map<String, dynamic>>> fetchLeaderboardData() async {
+    try {
+      // Query tbl_student for all students with department
+      final studentResponse = await Supabase.instance.client
+          .from('tbl_student')
+          .select('student_id, student_name, tbl_class(tbl_course(tbl_department(department_name)))');
+
+      final List<Map<String, dynamic>> students = studentResponse;
+
+      // Query tbl_quizhead for quiz scores
+      final quizResponse = await Supabase.instance.client
+          .from('tbl_quizhead')
+          .select('student_id, student_totalmark');
+
+      final List<Map<String, dynamic>> quizResults = quizResponse;
+
+      // Aggregate scores by student_id
+      Map<String, int> scoreMap = {};
+      for (var result in quizResults) {
+        final studentId = result['student_id'] as String;
+        final score = (result['student_totalmark'] ?? 0) as int;
+        scoreMap[studentId] = (scoreMap[studentId] ?? 0) + score;
+      }
+
+      // Build leaderboard with department
+      List<Map<String, dynamic>> leaderboard = students.map((student) {
+        String department = '';
+        try {
+          department = student['tbl_class']?['tbl_course']?['tbl_department']?['department_name'] ?? '';
+        } catch (_) {}
+        return {
+          'id': student['student_id'] as String,
+          'name': student['student_name'] as String,
+          'department': department,
+          'score': scoreMap[student['student_id']] ?? 0,
+        };
+      }).toList();
+
+      // Sort by score descending
+      leaderboard.sort((a, b) => b['score'].compareTo(a['score']));
+
+      // Assign ranks
+      for (int i = 0; i < leaderboard.length; i++) {
+        leaderboard[i]['rank'] = i + 1;
+      }
+
+      return leaderboard;
+    } catch (e) {
+      print('Failed to fetch leaderboard data: $e');
+      throw Exception('Failed to fetch leaderboard data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // **Gradient Background**
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade500, Colors.amber.shade400],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {}); // Trigger rebuild to refresh data
+        },
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: fetchLeaderboardData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            }
 
-          // **Blur Layer for Depth**
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Container(color: Colors.white.withOpacity(0.05)),
-            ),
-          ),
+            final leaderboard = snapshot.data!;
 
-          // **Leaderboard Content**
-          SafeArea(
-            child: Column(
+            return Stack(
               children: [
-                const SizedBox(height: 20),
-
-                // **Title**
-                const Text(
-                  "Leaderboard",
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 255, 255, 255),
+                // Gradient Background
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.orange.shade500, Colors.amber.shade400],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                   ),
                 ),
-                
-
-                const SizedBox(height: 20),
-
-                // **Top 3 Players with Smaller Avatars**
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildTopPlayer("2nd", 122700, 40, 'assets/images/second.png'),
-                    _buildTopPlayer("1st", 122900, 50, 'assets/images/first.png', isWinner: true),
-                    _buildTopPlayer("3rd", 122600, 40, 'assets/images/third.png'),
-                  ],
+                // Blur Layer
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                    child: Container(color: Colors.white.withOpacity(0.05)),
+                  ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // **Scrollable White Box for Leaderboard**
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          spreadRadius: 2,
+                // Main Content
+                SafeArea(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      const Text(
+                        "Leaderboard",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: ListView.builder(
-                        itemCount: leaderboard.length,
-                        itemBuilder: (context, index) {
-                          var player = leaderboard[index];
-                          return _buildLeaderboardTile(
-                            player["name"],
-                            player["rank"],
-                            player["score"],
-                          );
-                        },
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      // Top 3 Players
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          if (leaderboard.length > 1)
+                            _buildTopPlayer(
+                              "2nd",
+                              leaderboard[1]['name'],
+                              leaderboard[1]['score'],
+                              40,
+                              'assets/images/second.png',
+                              isCurrentUser: leaderboard[1]['id'] == supabase.auth.currentUser!.id,
+                            ),
+                          if (leaderboard.isNotEmpty)
+                            _buildTopPlayer(
+                              "1st",
+                              leaderboard[0]['name'],
+                              leaderboard[0]['score'],
+                              50,
+                              'assets/images/first.png',
+                              isWinner: true,
+                              isCurrentUser: leaderboard[0]['id'] == supabase.auth.currentUser!.id,
+                            ),
+                          if (leaderboard.length > 2)
+                            _buildTopPlayer(
+                              "3rd",
+                              leaderboard[2]['name'],
+                              leaderboard[2]['score'],
+                              40,
+                              'assets/images/third.png',
+                              isCurrentUser: leaderboard[2]['id'] == supabase.auth.currentUser!.id,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Leaderboard List
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: ListView.builder(
+                              itemCount: leaderboard.length,
+                              itemBuilder: (context, index) {
+                                var player = leaderboard[index];
+                                return _buildLeaderboardTile(
+                                  player['name'],
+                                  player['rank'],
+                                  player['score'],
+                                  player['id'] == supabase.auth.currentUser!.id,
+                                  player['department'] ?? '',
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  // **Top 3 Players Widget**
-  Widget _buildTopPlayer(String rank, int score, double size, String imagePath, {bool isWinner = false}) {
+  Widget _buildTopPlayer(
+    String rank,
+    String name,
+    int score,
+    double size,
+    String imagePath, {
+    bool isWinner = false,
+    bool isCurrentUser = false,
+  }) {
     return Column(
       children: [
         ClipOval(
@@ -123,21 +215,33 @@ class Leaderboard extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        if (isWinner)
-        const SizedBox(height: 5),
-        Text(rank, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        Text(score.toString(), style: const TextStyle(fontSize: 14)),
+        if (isWinner) const SizedBox(height: 5),
+        Text(
+          rank,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          isCurrentUser ? "$name (YOU)" : name,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: isCurrentUser ? const Color.fromARGB(255, 255, 242, 4) : Colors.black,
+          ),
+        ),
+        Text(
+          score.toString(),
+          style: const TextStyle(fontSize: 14),
+        ),
       ],
     );
   }
 
-  // **Leaderboard List Tile**
-  Widget _buildLeaderboardTile(String name, int rank, int score) {
+  Widget _buildLeaderboardTile(String name, int rank, int score, bool isCurrentUser, String department) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: isCurrentUser ? Colors.blue.shade50 : Colors.white.withOpacity(0.9),
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
@@ -152,8 +256,14 @@ class Leaderboard extends StatelessWidget {
             backgroundColor: Colors.grey,
             child: Icon(Icons.account_circle, color: Colors.white),
           ),
-          title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text("Number $rank"),
+          title: Text(
+            isCurrentUser ? "$name (YOU)" : name,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isCurrentUser ? Colors.blue : Colors.black,
+            ),
+          ),
+          subtitle: Text("Rank $rank\nDept: $department"),
           trailing: Text(
             score.toString(),
             style: const TextStyle(

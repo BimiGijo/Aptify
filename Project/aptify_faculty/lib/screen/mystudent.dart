@@ -19,10 +19,29 @@ class _MyStudentState extends State<MyStudent> {
 
   // **Fetch Students from Database**
   Future<void> fetchStudents() async {
+    final currentUserId = supabase.auth.currentUser?.id;
+      if (currentUserId == null) {
+        throw Exception("Current teacher not found");
+      }
+
+      // Fetch class where teacher_id = currentUserId
+      final classResponse = await supabase
+          .from('tbl_class')
+          .select('class_id')
+          .eq('teacher_id', currentUserId)
+          .limit(1)
+          .maybeSingle();
+
+      if (classResponse == null || classResponse['class_id'] == null) {
+        throw Exception("Class not assigned to this teacher");
+      }
+
+      final classId = classResponse['class_id'];
     try {
       final List<Map<String, dynamic>> data = await supabase
           .from('tbl_student')
-          .select();
+          .select()
+          .eq('class_id', classId);
 
       setState(() {
         students = data;

@@ -1,10 +1,8 @@
 import 'dart:ui'; // Import for blur effect
 import 'package:aptify_subadmin/screen/adminhome.dart';
-import 'package:aptify_subadmin/screen/dashboard.dart';
+import 'package:aptify_subadmin/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:aptify_subadmin/main.dart';
-//import 'package:cherry_toast/cherry_toast.dart';
-//import 'package:cherry_toast/resources/arrays.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,17 +15,23 @@ class _LoginState extends State<LoginPage> {
   bool passkey = true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final AuthService _authService = AuthService();
   Future<void> signIn() async {
     try {
+      
       await supabase.auth.signInWithPassword(
         email: _emailController.text,
         password: _passwordController.text);
+
+        await _authService.storeCredentials(
+          _emailController.text, _passwordController.text);
+
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context)=>AdminHome()));
     } catch (e) {
-      print('Error in Logging In');
+      print('Error in Logging In: $e');
       /*CherryToast.error(
         description: Text('Invalid Email or Password',
            style: TextStyle(color: Colors.black)),
@@ -128,12 +132,7 @@ class _LoginState extends State<LoginPage> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AdminHome(),
-                                  ),
-                                );
+                                signIn();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blueAccent,

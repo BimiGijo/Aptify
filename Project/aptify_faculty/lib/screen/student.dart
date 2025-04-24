@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aptify_faculty/main.dart';
+import 'package:aptify_faculty/services/auth_service.dart';
 
 class StudentPage extends StatefulWidget {
   const StudentPage({super.key});
@@ -15,18 +16,29 @@ class _StudentPageState extends State<StudentPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+
   Future<void> register() async {
     try {
       final auth = await supabase.auth.signUp(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      final uid = auth.user!.id;
-      if (uid.isNotEmpty) {
-        submitForm(uid);
+
+       await _authService.relogin();
+
+      final uid = auth.user?.id;
+      if (uid != null && uid.isNotEmpty) {
+        await submitForm(uid);
       }
     } catch (e) {
-      print('Authentication Error');
+      print('Authentication Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Authentication failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -37,12 +49,34 @@ class _StudentPageState extends State<StudentPage> {
       String password = _passwordController.text.trim();
       String contact = _contactController.text.trim();
 
+      // Get current teacher ID
+      final currentUserId = supabase.auth.currentUser?.id;
+      if (currentUserId == null) {
+        throw Exception("Current teacher not found");
+      }
+
+      // Fetch class where teacher_id = currentUserId
+      final classResponse = await supabase
+          .from('tbl_class')
+          .select('class_id')
+          .eq('teacher_id', currentUserId)
+          .limit(1)
+          .maybeSingle();
+
+      if (classResponse == null || classResponse['class_id'] == null) {
+        throw Exception("Class not assigned to this teacher");
+      }
+
+      final classId = classResponse['class_id'];
+
+      // Insert student with class_id
       await supabase.from('tbl_student').insert({
         'student_id': uid,
         'student_name': name,
         'student_contact': contact,
         'student_email': email,
         'student_password': password,
+        'class_id': classId,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -61,6 +95,12 @@ class _StudentPageState extends State<StudentPage> {
       _contactController.clear();
     } catch (e) {
       print('Error inserting Student Details: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add student: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -78,7 +118,7 @@ class _StudentPageState extends State<StudentPage> {
       body: Center(
         child: SingleChildScrollView(
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.85,  // Box width
+            width: MediaQuery.of(context).size.width * 0.85,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -105,8 +145,6 @@ class _StudentPageState extends State<StudentPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
-                  // **Student Name Field**
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(
@@ -122,11 +160,9 @@ class _StudentPageState extends State<StudentPage> {
                     },
                   ),
                   const SizedBox(height: 15),
-
-                  // **Contact Number Field**
                   TextFormField(
                     controller: _contactController,
-                    keyboardType: TextInputType.phone,    // NUMERIC KEYBOARD
+                    keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       labelText: 'Contact Number',
                       border: OutlineInputBorder(),
@@ -143,8 +179,6 @@ class _StudentPageState extends State<StudentPage> {
                     },
                   ),
                   const SizedBox(height: 15),
-
-                  // **Email Field**
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -161,8 +195,6 @@ class _StudentPageState extends State<StudentPage> {
                     },
                   ),
                   const SizedBox(height: 15),
-
-                  // **Password Field**
                   TextFormField(
                     controller: _passwordController,
                     decoration: const InputDecoration(
@@ -182,8 +214,6 @@ class _StudentPageState extends State<StudentPage> {
                     },
                   ),
                   const SizedBox(height: 25),
-
-                  // **Add Student Button**
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -198,11 +228,6 @@ class _StudentPageState extends State<StudentPage> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         register();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Student Added Successfully'),
-                          ),
-                        );
                       }
                     },
                     child: const Text(

@@ -1,3 +1,4 @@
+import 'package:aptify_faculty/screen/adminhome.dart';
 import 'package:flutter/material.dart';
 import 'package:aptify_faculty/screen/login.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,8 +24,25 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
+      home: const AuthWrapper(),
     );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Check if the user is logged in
+    final session = supabase.auth.currentSession;
+
+    // Navigate to the appropriate screen based on the authentication state
+    if (session != null) {
+      return FacultyHomePage(); // Replace with your home screen widget
+    } else {
+      return const LoginScreen(); // Replace with your auth page widget
+    }
   }
 }
 

@@ -46,7 +46,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
       fetchData();
       _categoryController.clear();
       _linkController.clear();
-      showSnackbar('Category Added', Color(0xFF14213D));
+      showSnackbar('Category Added', const Color(0xFF14213D));
     } catch (e) {
       print('Error inserting category: $e');
     }
@@ -60,10 +60,11 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
         'category_link': _linkController.text.trim()
       }).eq('category_id', _editId);
       fetchData();
-      showSnackbar('Category Updated', Color(0xFF14213D));
+      showSnackbar('Category Updated', const Color(0xFF14213D));
       setState(() {
         _editId = 0;
         _categoryController.clear();
+        _linkController.clear();
       });
     } catch (e) {
       print("Error updating category: $e");
@@ -74,7 +75,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
     try {
       await supabase.from('tbl_category').delete().eq('category_id', id);
       fetchData();
-      showSnackbar('Category Deleted', Color(0xFF14213D));
+      showSnackbar('Category Deleted', const Color(0xFF14213D));
       setState(() {
         _editId = 0;
         _categoryController.clear();
@@ -87,7 +88,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
 
   void showSnackbar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message, style: TextStyle(color: Colors.white)), backgroundColor: color),
+      SnackBar(content: Text(message, style: const TextStyle(color: Colors.white)), backgroundColor: color),
     );
   }
 
@@ -100,12 +101,12 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('MANAGE CATEGORY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('MANAGE CATEGORY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF161616),
+                    backgroundColor: const Color(0xFF161616),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 18)),
+                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 18)),
                 onPressed: () {
                   setState(() {
                     _isFormVisible = !_isFormVisible;
@@ -116,7 +117,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
                     }
                   });
                 },
-                label: Text(_isFormVisible ? "Cancel" : "Add", style: TextStyle(color: Colors.white)),
+                label: Text(_isFormVisible ? "Cancel" : "Add", style: const TextStyle(color: Colors.white)),
                 icon: Icon(_isFormVisible ? Icons.cancel : Icons.add, color: Colors.white),
               )
             ],
@@ -126,7 +127,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
             curve: Curves.easeInOut,
             child: _isFormVisible
                 ? Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -134,29 +135,29 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
                     ),
                     child: Column(
                       children: [
-                        Text(_editId == 0 ? "Add Category" : "Edit Category", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 10),
+                        Text(_editId == 0 ? "Add Category" : "Edit Category", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _categoryController,
-                          decoration: InputDecoration(
-                            hintText: 'Category',
+                          decoration: const InputDecoration(
+                            labelText: 'Category',
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.category),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         TextField(
                           controller: _linkController,
-                          decoration: InputDecoration(
-                            hintText: 'Category API Link',
+                          decoration: const InputDecoration(
+                            labelText: 'Category API Link',
                             border: OutlineInputBorder()
                           ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF161616), padding: EdgeInsets.symmetric(horizontal: 70, vertical: 18)),
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF161616), padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 18)),
                           onPressed: _editId == 0 ? categorySubmit : updateCategory,
-                          child: Text(_editId == 0 ? 'Add' : 'Update', style: TextStyle(color: Colors.white)),
+                          child: Text(_editId == 0 ? 'Add' : 'Update', style: const TextStyle(color: Colors.white)),
                         ),
                       ],
                     ),
@@ -165,7 +166,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
           ),
           Expanded(
             child: _categoryList.isEmpty
-                ? Center(child: Text("No Categories Found"))
+                ? const Center(child: Text("No Categories Found"))
                 : ListView.builder(
                     itemCount: _categoryList.length,
                     itemBuilder: (context, index) {
@@ -177,7 +178,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit, color: Colors.blue),
+                                icon: const Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
                                   setState(() {
                                     _editId = category['category_id'];
@@ -188,7 +189,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
+                                icon: const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () => deleteCategory(category['category_id']),
                               ),
                             ],

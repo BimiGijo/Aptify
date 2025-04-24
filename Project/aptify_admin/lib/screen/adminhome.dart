@@ -27,7 +27,7 @@ class _AdminHomeState extends State<AdminHome> {
     const Course(),
     const Category(),
     const Difficulty(),
-    const ComplaintScreen(),
+    const AdminComplaintsPage(),
     const FeedbackScreen(),
   ];
 

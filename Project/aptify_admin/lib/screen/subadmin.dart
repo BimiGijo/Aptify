@@ -40,9 +40,21 @@ class _SubAdminState extends State<SubAdmin> with SingleTickerProviderStateMixin
 
   Future<void> submitForm(String uid) async {
     try {
-      String name = _nameController.text;
+      String name = _nameController.text.trim();
       String email = _emailController.text;
       String password = _passwordController.text;
+
+    final college = await supabase
+      .from('tbl_subadmin')
+      .select("subadmin_name");
+
+    final isDuplicate = college.any((c) => 
+    c['subadmin_name'].toString().trim().toLowerCase() == name.toLowerCase());
+
+    if (isDuplicate) {
+      showSnackbar('College with this name already exists', Colors.orange);
+      return;
+    }
   
   await supabase.from('tbl_subadmin').insert(
     {'subadmin_id': uid,
@@ -52,15 +64,21 @@ class _SubAdminState extends State<SubAdmin> with SingleTickerProviderStateMixin
     });
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text(
-        'Sub-Admin Added',
+        'College Added',
         style: TextStyle(color: Colors.white)
-        ),
-        backgroundColor: Colors.green
-        ));
-        fetchData();
+      ),
+      backgroundColor: Colors.green
+      ));
+
+      await fetchData();
+
+      setState(() {
         _nameController.clear();
         _emailController.clear();
         _passwordController.clear();
+        _isFormVisible = false;
+      });
+        
 } catch (e) {
   print('Error inserting data: $e');
 }
@@ -77,6 +95,36 @@ Future<void> fetchData() async {
       print('Error fetching data: $e');
   }
 }
+
+Future<void> deleteSubAdmin(String subadminId) async {
+  try {
+    await supabase.from('tbl_subadmin').delete().eq('subadmin_id', subadminId);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('College deleted', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red,
+      ),
+    );
+    await fetchData();
+  } catch (e) {
+    print('Error deleting subadmin: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error deleting: $e', style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+void showSnackbar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: color,
+      ),
+    );
+  }
   
 
   @override
@@ -90,12 +138,12 @@ Future<void> fetchData() async {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Manage Colleges', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text('Manage Colleges', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF161616),
+                      backgroundColor: const Color(0xFF161616),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 18)
+                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 18)
                     ),
                     onPressed: () {
                       setState(() {
@@ -118,7 +166,7 @@ Future<void> fetchData() async {
                 curve: Curves.easeInOut,
                 child: _isFormVisible
                   ? Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -126,41 +174,41 @@ Future<void> fetchData() async {
                     ),
                     child: Column(
                       children: [
-                        Text('Add College', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const Text('Add College', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         SizedBox(height: 10),
                         TextFormField(
                           controller: _nameController,
-                          decoration: InputDecoration(
-                            hintText: "Name",
+                          decoration: const InputDecoration(
+                            labelText: "Name",
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.account_box)
                           ),                        
                           validator: (value) => value!.isEmpty ? "Please enter your name" : null,
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _emailController,
-                          decoration: InputDecoration(
-                            hintText: "Email",
+                          decoration: const InputDecoration(
+                            labelText: "Email",
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.email)
                           ),                            
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _passwordController,
-                          decoration: InputDecoration(
-                            hintText: "Password",
+                          decoration: const InputDecoration(
+                            labelText: "Password",
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.remove_red_eye)),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF161616), padding: EdgeInsets.symmetric(horizontal: 70, vertical: 18)
                           ),
                           onPressed: register,
-                          child: Text("Add", style: TextStyle(color: Colors.white),),
+                          child: const Text("Add", style: TextStyle(color: Colors.white),),
                         ),
                       ],
                     ),
@@ -169,7 +217,7 @@ Future<void> fetchData() async {
                 ), 
                 Expanded(
                   child: _subadminList.isEmpty
-                    ? Center(child: Text("No Colleges Added"))
+                    ? const Center(child: Text("No Colleges Added"))
                     : ListView.builder(
                         itemCount: _subadminList.length,
                         itemBuilder: (context, index) {
@@ -177,7 +225,32 @@ Future<void> fetchData() async {
                           return Card(
                             child: ListTile(
                             title: Text(subAdmin['subadmin_name']),
-                            subtitle: Text(subAdmin['subadmin_email']),                            
+                            subtitle: Text(subAdmin['subadmin_email']),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Delete College'),
+                                    content: const Text('Are you sure you want to delete this college?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, true),
+                                        child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  await deleteSubAdmin(subAdmin['subadmin_id']);
+                                }
+                              },
+                            ),
                           )
                         );
                         }
