@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aptify_admin/main.dart';
 
+
 class Category extends StatefulWidget {
   const Category({super.key});
 
@@ -101,7 +102,7 @@ class _CategoryState extends State<Category> with SingleTickerProviderStateMixin
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('MANAGE CATEGORY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('CATEGORY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF161616),

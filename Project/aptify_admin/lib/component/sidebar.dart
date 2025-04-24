@@ -9,7 +9,7 @@ class Sidebar extends StatefulWidget {
 }
 
 class _SidebarState extends State<Sidebar> {
-  int _selectedIndex = 0; // Track selected item
+  int _selectedIndex = 0;
 
   final List<String> pages = [
     "Dashboard",
@@ -35,18 +35,18 @@ class _SidebarState extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(  
-      width: 100, 
-      constraints: const BoxConstraints(maxWidth: 100), 
+    return Container(
+      width: 100,
+      constraints: const BoxConstraints(maxWidth: 100),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF000000), Color(0xFF0A192F)], // Darker gradient
+          colors: [Color(0xFF000000), Color(0xFF14213D)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
         boxShadow: [
           BoxShadow(
-            color: Color.fromARGB(221, 49, 49, 49), // Stronger shadow for better separation
+            color: Color.fromARGB(221, 49, 49, 49),
             blurRadius: 5,
             spreadRadius: 2,
             offset: Offset(3, 0),
@@ -63,7 +63,7 @@ class _SidebarState extends State<Sidebar> {
                 bool isSelected = _selectedIndex == index;
                 return Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white.withOpacity(0.15) : Colors.transparent,
+                    color: isSelected ? Colors.white.withOpacity(0.08) : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
@@ -76,16 +76,16 @@ class _SidebarState extends State<Sidebar> {
                       widget.onItemSelected(index);
                     },
                     leading: Icon(
-                      icons[index], 
-                      color: isSelected ? Colors.orangeAccent : Colors.white,
-                      size: 30, 
+                      icons[index],
+                      color: isSelected ? Color(0xFFfca311) : Colors.white70,
+                      size: 30,
                     ),
                     title: Text(
                       pages[index],
                       style: TextStyle(
-                        color: isSelected ? Colors.orangeAccent : Colors.white,
+                        color: isSelected ? Color(0xFFfca311) : Colors.white70,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        fontSize: 16, 
+                        fontSize: 16,
                       ),
                     ),
                   ),

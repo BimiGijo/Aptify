@@ -1,5 +1,6 @@
 import 'package:aptify_admin/main.dart';
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -41,14 +42,13 @@ class _DashboardState extends State<Dashboard> {
         isLoading = false;
         errorMessage = 'Error fetching data: $e';
       });
-      print("Error fetching data: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(16),
       child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
@@ -56,126 +56,90 @@ class _DashboardState extends State<Dashboard> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Welcome Admin Box (Full Width)
+                    // Header
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 5,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFF14213D),
                       ),
                       child: const Text(
                         "Welcome Admin!",
                         style: TextStyle(
-                          color: Color(0xFF1F4037),
-                          fontSize: 25,
-                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFfca311),
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 20),
 
-                    // First Row - Two Big Boxes
+                    // Charts Section
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Pie Chart for Users
                         Expanded(
+                          flex: 2,
                           child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xffeeeeee),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                            height: 300,
                             padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                            ),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
-                                  Icons.school,
-                                  size: 60,
-                                  color: Colors.amber,
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Total Students',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F4037),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  studentCount.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.black,
+                                const Text("User Distribution", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 20),
+                                AspectRatio(
+                                  aspectRatio: 1.3,
+                                  child: PieChart(
+                                    PieChartData(
+                                      sectionsSpace: 2,
+                                      centerSpaceRadius: 40,
+                                      sections: [
+                                        PieChartSectionData(
+                                          value: studentCount.toDouble(),
+                                          color: Colors.blueAccent,
+                                          title: 'Students',
+                                          titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
+                                        ),
+                                        PieChartSectionData(
+                                          value: teacherCount.toDouble(),
+                                          color: Colors.orange,
+                                          title: 'Teachers',
+                                          titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
+                                        ),
+                                        PieChartSectionData(
+                                          value: collegeCount.toDouble(),
+                                          color: Colors.green,
+                                          title: 'Colleges',
+                                          titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 20),
+
+                        // Stats Summary
                         Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xffeeeeee),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                            height: 300,
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.person_2_rounded,
-                                  size: 60,
-                                  color: Colors.amber,
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Total Teachers',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F4037),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  teacherCount.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          flex: 3,
+                          child: Column(
+                            children: [
+                              _buildStatCard("Total Students", studentCount, Icons.school),
+                              const SizedBox(height: 16),
+                              _buildStatCard("Total Teachers", teacherCount, Icons.person),
+                              const SizedBox(height: 16),
+                              _buildStatCard("Total Colleges", collegeCount, Icons.account_balance),
+                              const SizedBox(height: 16),
+                              _buildStatCard("Total Quizzes", quizCount, Icons.quiz),
+                            ],
                           ),
                         ),
                       ],
@@ -183,152 +147,49 @@ class _DashboardState extends State<Dashboard> {
 
                     const SizedBox(height: 20),
 
-                    // Second Row - Three Smaller Boxes
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xffeeeeee),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                            height: 200,
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.account_balance,
-                                  size: 40,
-                                  color: Colors.amber,
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Total Colleges',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F4037),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  collegeCount.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xffeeeeee),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                            height: 200,
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.quiz,
-                                  size: 40,
-                                  color: Colors.amber,
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Total Quizzes',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F4037),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  quizCount.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xffeeeeee),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                            height: 200,
-                            padding: const EdgeInsets.all(20),
-                            child: const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.info,
-                                  size: 40,
-                                  color: Colors.amber,
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  'System Status',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F4037),
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  'Operational',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                    // Status box
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white,
+                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.info, color: Colors.green, size: 32),
+                          SizedBox(width: 12),
+                          Text("System Status: Operational", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
                     ),
-
-                    const SizedBox(height: 20),
                   ],
                 ),
+    );
+  }
+
+  Widget _buildStatCard(String title, int count, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xffeeeeee),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 40, color: const Color(0xFFfca311)),
+          const SizedBox(width: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('$count', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
