@@ -3,7 +3,7 @@ import 'package:aptify_admin/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Department extends StatefulWidget {
-  const Department({super.key});
+  const Department({Key? key}) : super(key:key);
 
   @override
   State<Department> createState() => _DepartmentState();

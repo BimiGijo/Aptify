@@ -2,7 +2,7 @@ import 'package:aptify_admin/main.dart';
 import 'package:flutter/material.dart';
 
 class Course extends StatefulWidget {
-  const Course({super.key});
+  const Course({Key? key}) : super(key:key);
 
   @override
   State<Course> createState() => _CourseState();

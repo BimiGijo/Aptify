@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
   
 
 class ChangePasswordDialog extends StatefulWidget {
-  const ChangePasswordDialog({super.key});
+  const ChangePasswordDialog({Key? key}) : super(key:key);
 
   @override
   State<ChangePasswordDialog> createState() => _ChangePasswordDialogState();

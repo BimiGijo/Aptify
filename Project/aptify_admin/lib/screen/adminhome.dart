@@ -11,7 +11,7 @@ import 'package:aptify_admin/screen/department.dart';
 import 'package:aptify_admin/screen/subadmin.dart';
 
 class AdminHome extends StatefulWidget {
-  const AdminHome({super.key});
+  const AdminHome({Key? key}) : super(key:key);
 
   @override
   State<AdminHome> createState() => _AdminHomeState();

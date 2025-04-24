@@ -4,7 +4,7 @@ import 'package:aptify_admin/main.dart';
 import 'package:aptify_admin/screen/adminhome.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key:key);
 
   @override
   State<LoginPage> createState() => _LoginState();

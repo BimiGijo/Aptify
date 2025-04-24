@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  const Dashboard({Key? key}) : super(key:key);
 
   @override
   State<Dashboard> createState() => _DashboardState();

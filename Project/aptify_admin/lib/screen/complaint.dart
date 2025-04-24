@@ -2,7 +2,7 @@ import 'package:aptify_admin/main.dart';
 import 'package:flutter/material.dart';
 
 class AdminComplaintsPage extends StatefulWidget {
-  const AdminComplaintsPage({super.key});
+  const AdminComplaintsPage({Key? key}) : super(key:key);
 
   @override
   State<AdminComplaintsPage> createState() => _AdminComplaintsPageState();

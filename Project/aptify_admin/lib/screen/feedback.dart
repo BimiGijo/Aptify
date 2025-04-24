@@ -2,7 +2,7 @@ import 'package:aptify_admin/main.dart';
 import 'package:flutter/material.dart';
 
 class FeedbackScreen extends StatefulWidget {
-  const FeedbackScreen({super.key});
+  const FeedbackScreen({Key? key}) : super(key:key);
 
   @override
   State<FeedbackScreen> createState() => _FeedbackScreenState();

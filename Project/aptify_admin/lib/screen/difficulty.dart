@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:aptify_admin/main.dart';
 
 class Difficulty extends StatefulWidget {
-  const Difficulty({super.key});
+  const Difficulty({Key? key}) : super(key:key);
 
   @override
   State<Difficulty> createState() => _DifficultyState();

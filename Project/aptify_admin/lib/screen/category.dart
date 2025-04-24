@@ -3,7 +3,7 @@ import 'package:aptify_admin/main.dart';
 
 
 class Category extends StatefulWidget {
-  const Category({super.key});
+  const Category({Key? key}) : super(key:key);
 
   @override
   State<Category> createState() => _CategoryState();

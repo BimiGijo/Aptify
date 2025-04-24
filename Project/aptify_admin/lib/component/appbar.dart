@@ -3,7 +3,7 @@ import 'package:aptify_admin/screen/login.dart';
 import 'package:aptify_admin/screen/changepassword.dart';
 
 class Appbar extends StatelessWidget {
-  const Appbar({super.key});
+  const Appbar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
